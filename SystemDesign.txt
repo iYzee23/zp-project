@@ -1,0 +1,114 @@
+----------------------------------------------------
+
+FileUtil
+### data
+### filepath
+--> importPEM
+--> exportPEM
+--> importMessage
+--> exportMessage
+
+----------------------------------------------------
+
+SHA1
+### data
+### hash1, hash2
+--> generateHash
+--> compareHashes
+
+Algorithm
+### key
+--> encryptMessage
+--> decryptMessage
+
+RSA [Algorithm]
+### key
+### name
+### mail
+### size (1024/2048)
+### filepath
+--> generateKey
+--> importKey
+--> exportKey
+--> importPublic
+--> exportPublic
+--> encryptMessage
+--> decryptMessage
+
+3DES [Algorithm]
+### key
+--> encryptMessage
+--> decryptMessage
+
+AES128 [Algorithm]
+### key
+--> encryptMessage
+--> decryptMessage
+
+----------------------------------------------------
+
+PublicRingRow
+*** Timestamp
+*** PublicKey
+*** KeyID
+*** UserID
+
+PrivateRingRow [PubicRingRow]
+### name
+### mail
+### size (1024/2048)
+### password
+*** EncryptedPrivateKey
+*** Algorithm
+*** HashedPassword
+--> getPrivateKey
+--> generateKey
+
+----------------------------------------------------
+
+MessageComponent
+*** Timestamp
+*** KeyID (Sender/Recipient)
+*** Info (Digest/SessionKey)
+
+Message
+*** Options (Raw)
+*** Data
+*** Timestamp
+*** Filename
+*** Algorithm
+*** MessageComponentSignature
+*** MessageComponentSession
+--> generateSignature
+--> encryptSignature (getPrivateKey[Sender])
+--> concatenateMessageSignatureKeyID
+--> compressMessage
+--> generateSessionKey
+--> encryptMessage
+--> encryptSessionKey
+--> concatenateMessageSessionKeyID
+--> convertToBase64
+--> !!! sendMessage
+--> convertFromBase64
+--> splitMessageSessionKeyID
+--> decryptSessionKey (getPrivateKey[Recipient])
+--> decryptMessage
+--> decompressMessage
+--> splitMessageSignatureKeyID
+--> decryptSignature
+--> verifySignature (generateSignature, decryptSignature)
+--> !!! receiveMessage
+
+###	on frontend, we check what options have been selected
+### based on those options, we fill Options field in Message
+### based on those options, we (don't) call specific methods
+
+### on frontend, we have field: SenderKeyID (for private key)
+### on frontend, we have field: RecipientKeyID (for public key)
+### based on selected values, we choose rows from Private/PublicRing
+
+### on frontend, we have field: Algorithm
+### based on that value, we fill Algorithm field in Message
+### based on that value, we apply correspondent Encryption/Decryption
+
+----------------------------------------------------
