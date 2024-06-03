@@ -1,10 +1,10 @@
 ----------------------------------------------------
 
-FileUtil
+FileUtil +
 ### data
 ### pem_type
---> import_PEM
---> export_PEM
+--> import_PEM +
+--> export_PEM +
 --> import_message +
 --> export_message +
 
@@ -16,34 +16,32 @@ SHA1
 --> generateHash
 --> compareHashes
 
-Algorithm
+RSA [Algorithm] +
 ### key
---> encryptMessage
---> decryptMessage
-
-RSA [Algorithm]
-### key
-### name
-### mail
+### message
+### cypher
 ### size (1024/2048)
-### filepath
---> generateKey
---> importKey
---> exportKey
---> importPublic
---> exportPublic
---> encryptMessage
---> decryptMessage
+--> generate_keys +
+--> importKey +
+--> exportKey +
+--> importPublic +
+--> exportPublic +
+--> encrypt_message +
+--> decrypt_message +
 
-3DES [Algorithm]
+3DES [Algorithm] +
 ### key
---> encryptMessage
---> decryptMessage
+### message
+### cypher
+--> encryptMessage +
+--> decryptMessage +
 
-AES128 [Algorithm]
+AES128 [Algorithm] +
 ### key
---> encryptMessage
---> decryptMessage
+### message
+### cypher
+--> encryptMessage +
+--> decryptMessage +
 
 ----------------------------------------------------
 
