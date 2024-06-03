@@ -2,6 +2,6 @@ from Global.Testing import *
 
 
 # test_imports_exports()
-# test_RSA()
-# test_AES128()
-# test_DES3()
+# test_rsa()
+# test_aes128()
+# test_des3()

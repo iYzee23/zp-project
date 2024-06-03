@@ -24,12 +24,12 @@ def test_imports_exports():
     print(message_pem)
 
 
-def test_RSA():
-    (public_key, private_key)=RSA.generate_key(1024)
+def test_rsa():
+    (public_key, private_key) = RSA.generate_key(1024)
     message = "Hello World"
-    cyphertext=RSA.encrypt_message(message, public_key)
+    cyphertext = RSA.encrypt_message(message, public_key)
     print(cyphertext)
-    original_message=RSA.decrypt_message(cyphertext, private_key)
+    original_message = RSA.decrypt_message(cyphertext, private_key)
     print(original_message)
     RSA.export_public(public_key)
     print(RSA.import_public())
@@ -37,18 +37,18 @@ def test_RSA():
     print(RSA.import_key())
 
 
-def test_AES128():
-    # key=os.urandom(16)
-    key=secrets.token_bytes(16)
-    message="Hello World"
-    cyphertext=AES128.encrypt_message(message,key)
+def test_aes128():
+    # key = os.urandom(16)
+    key = secrets.token_bytes(16)
+    message = "Hello World"
+    cyphertext = AES128.encrypt_message(message, key)
     print(cyphertext)
-    original_message=AES128.decrypt_message(cyphertext,key)
+    original_message = AES128.decrypt_message(cyphertext, key)
     print(original_message)
 
 
-def test_DES3():
-    # key=os.urandom(24)
+def test_des3():
+    # key = os.urandom(24)
     key = secrets.token_bytes(24)
     message = "Hello World"
     cyphertext = DES3.encrypt_message(message, key)

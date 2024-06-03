@@ -10,11 +10,10 @@ class DES3:
         encryptor = cipher.encryptor()
 
         padder = padding.PKCS7(algorithms.TripleDES.block_size).padder()
-        padded_data = padder.update(message.encode('utf-8')) + padder.finalize()
+        padded_data = padder.update(message.encode("utf-8")) + padder.finalize()
 
         ciphertext = encryptor.update(padded_data) + encryptor.finalize()
         return ciphertext
-
 
     @staticmethod
     def decrypt_message(ciphertext, key):
@@ -25,4 +24,4 @@ class DES3:
 
         unpadder = padding.PKCS7(algorithms.TripleDES.block_size).unpadder()
         decrypted_data = unpadder.update(decrypted_padded_data) + unpadder.finalize()
-        return decrypted_data.decode('utf-8')
+        return decrypted_data.decode("utf-8")
