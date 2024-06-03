@@ -4,6 +4,6 @@ class SHA1:
         return
 
     @staticmethod
-    def compare_hashes(hash1,hash2):
+    def compare_hashes(hash1, hash2):
         return hash1 == hash2
 
