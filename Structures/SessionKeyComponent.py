@@ -1,5 +1,5 @@
-import datetime
 from MessageComponent import MessageComponent
+from Algorithms.RSA import RSA
 
 
 class SessionKeyComponent(MessageComponent):
@@ -15,11 +15,11 @@ class SessionKeyComponent(MessageComponent):
 
     @staticmethod
     def encrypt_session_key(session_key, public_key):
-        pass
+        return RSA.encrypt_message(session_key, public_key)
 
     @staticmethod
     def decrypt_session_key(enc_session_key, private_key):
-        pass
+        return RSA.decrypt_message(enc_session_key, private_key)
 
     @staticmethod
     def create_session_key_component_object(session_string):

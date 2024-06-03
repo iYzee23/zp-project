@@ -1,5 +1,5 @@
-import datetime
 from MessageComponent import MessageComponent
+from Algorithms.RSA import RSA
 
 
 class SignatureComponent(MessageComponent):
@@ -15,11 +15,11 @@ class SignatureComponent(MessageComponent):
 
     @staticmethod
     def encrypt_digest(digest, private_key):
-        pass
+        return RSA.encrypt_message(digest, private_key)
 
     @staticmethod
     def decrypt_digest(enc_digest, public_key):
-        pass
+        return RSA.decrypt_message(enc_digest, public_key)
 
     @staticmethod
     def create_signature_component_object(signature_string):

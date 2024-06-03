@@ -6,6 +6,9 @@ from PublicRingRow import PublicRingRow
 from SignatureComponent import SignatureComponent
 from SessionKeyComponent import SessionKeyComponent
 from Options import Options
+from Algorithms.SHA1 import SHA1
+from Algorithms.AES128 import AES128
+from Algorithms.DES3 import DES3
 
 
 class Message:
@@ -31,10 +34,10 @@ class Message:
 
     @staticmethod
     def generate_signature(data):
-        pass
+        return SHA1.generate_hash(data)
 
     @staticmethod
-    def generate_signature_component(message, password, sender_private_ring: PrivateRingRow):
+    def generate_signature_component(message, sender_private_ring: PrivateRingRow, password):
         key_id = sender_private_ring.key_id
         signature = Message.generate_signature(message.data)
         private_key = sender_private_ring.get_private_key(password)
@@ -55,7 +58,10 @@ class Message:
 
     @staticmethod
     def encrypt_message(algorithm, session_key, data):
-        pass
+        if algorithm == "AES128":
+            return AES128.encrypt_message(data, session_key)
+        else:
+            return DES3.encrypt_message(data, session_key)
 
     @staticmethod
     def send_message(message, sender_private_ring: PrivateRingRow, password, recipient_public_ring: PublicRingRow):
@@ -84,7 +90,10 @@ class Message:
 
     @staticmethod
     def decrypt_message(algorithm, session_key, data):
-        pass
+        if algorithm == "AES128":
+            return AES128.decrypt_message(data, session_key)
+        else:
+            return DES3.decrypt_message(data, session_key)
 
     @staticmethod
     def verify_signature(digest, data):
