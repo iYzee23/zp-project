@@ -15,6 +15,7 @@ class AES128:
         ciphertext = encryptor.update(padded_data) + encryptor.finalize()
         return ciphertext
 
+
     @staticmethod
     def decrypt_message(ciphertext, key):
         cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=default_backend())

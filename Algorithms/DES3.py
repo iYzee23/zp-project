@@ -15,6 +15,7 @@ class DES3:
         ciphertext = encryptor.update(padded_data) + encryptor.finalize()
         return ciphertext
 
+
     @staticmethod
     def decrypt_message(ciphertext, key):
         cipher = Cipher(algorithms.TripleDES(key), modes.ECB(), backend=default_backend())
