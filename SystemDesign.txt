@@ -2,11 +2,11 @@
 
 FileUtil
 ### data
-### filepath
---> importPEM
---> exportPEM
---> importMessage
---> exportMessage
+### pem_type
+--> import_PEM
+--> export_PEM
+--> import_message +
+--> export_message +
 
 ----------------------------------------------------
 
