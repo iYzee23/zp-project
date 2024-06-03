@@ -2,8 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 import base64
 class FileUtil:
-    def __init__(self):
-        pass
+
     def import_message(self):
         # Kreiranje glavnog prozora (root)
         root = tk.Tk()

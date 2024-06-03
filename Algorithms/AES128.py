@@ -1,10 +1,9 @@
-from Algorithm import Algorithm
-class AES128(Algorithm):
-    def __init__(self):
-        super().__init__()
-        pass
-    def encrypt_message(self,key):
+
+class AES128:
+    @staticmethod
+    def encrypt_message(key):
         return
 
-    def decrypt_message(self,key):
+    @staticmethod
+    def decrypt_message(key):
         return

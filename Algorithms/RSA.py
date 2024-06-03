@@ -1,25 +1,29 @@
-from Algorithm import Algorithm
-class RSA(Algorithm):
-    def __init__(self):
-        super().__init__()
-        pass
-    def encrypt_message(self, key):
+
+class RSA:
+    @staticmethod
+    def encrypt_message(key):
         return
 
-    def decrypt_message(self, key):
+    @staticmethod
+    def decrypt_message(key):
         return
 
-    def generate_key(self, size, name, mail):
+    @staticmethod
+    def generate_key(size, name, mail):
         pass
 
-    def import_key(self, filepath):
+    @staticmethod
+    def import_key(filepath):
         pass
 
-    def export_key(self, filepath, key):
+    @staticmethod
+    def export_key(filepath, key):
         pass
 
-    def import_public(self, filepath):
+    @staticmethod
+    def import_public(filepath):
         pass
 
-    def export_public(self, filepath, key):
+    @staticmethod
+    def export_public(filepath, key):
         pass

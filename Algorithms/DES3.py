@@ -1,10 +1,9 @@
-from Algorithm import Algorithm
-class DES3(Algorithm):
-    def __init__(self):
-        super().__init__()
-        pass
-    def encrypt_message(self,key):
+
+class DES3:
+    @staticmethod
+    def encrypt_message(key):
         return
 
-    def decrypt_message(self,key):
+    @staticmethod
+    def decrypt_message(key):
         return
