@@ -1,3 +1,5 @@
-print("Hello world")
-print("Hello world")
+from Structures.PublicRingRow import PublicRingRow
+from Structures.PrivateRingRow import PrivateRingRow
+
+
 print("Hello world")

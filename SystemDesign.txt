@@ -53,49 +53,62 @@ PublicRingRow
 *** KeyID
 *** UserID
 
-PrivateRingRow [PubicRingRow]
+PrivateRingRow [PublicRingRow]
 ### name
 ### mail
 ### size (1024/2048)
 ### password
-*** EncryptedPrivateKey
 *** Algorithm
 *** HashedPassword
+*** EncryptedPrivateKey
 --> getPrivateKey
---> generateKey
+--> hashPassword
+--> encryptPrivateKey
+--> decryptPrivateKey
 
 ----------------------------------------------------
 
+Options
+***	Encryption
+*** Authentication
+*** Compression
+*** Radix64
+*** Algorithm
+--> createOptionsObject
+
 MessageComponent
 *** Timestamp
-*** KeyID (Sender/Recipient)
-*** Info (Digest/SessionKey)
+*** KeyID
+
+SignatureComponent [MessageComponent]
+***	Timestamp
+*** KeyID
+*** Digest
+-->	encryptDigest
+-->	decryptDigest
+-->	createSignatureComponentObject
+
+SessionKeyComponent [MessageComponent]
+***	Timestamp
+*** KeyID
+***	SessionKey
+-->	encryptSessionKey
+-->	decryptSessionKey
+--> createSessionKeyComponentObject
 
 Message
 *** Options (Raw)
+*** Filename
 *** Data
 *** Timestamp
-*** Filename
-*** Algorithm
-*** MessageComponentSignature
-*** MessageComponentSession
---> generateSignature
---> encryptSignature (getPrivateKey[Sender])
---> concatenateMessageSignatureKeyID
---> compressMessage
+-->	createMessageObject
+-->	generateSignature
+--> generateSignatureComponent
 --> generateSessionKey
+--> generateSessionKeyComponent
 --> encryptMessage
---> encryptSessionKey
---> concatenateMessageSessionKeyID
---> convertToBase64
 --> !!! sendMessage
---> convertFromBase64
---> splitMessageSessionKeyID
---> decryptSessionKey (getPrivateKey[Recipient])
 --> decryptMessage
---> decompressMessage
---> splitMessageSignatureKeyID
---> decryptSignature
 --> verifySignature (generateSignature, decryptSignature)
 --> !!! receiveMessage
 
