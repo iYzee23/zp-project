@@ -1,4 +1,5 @@
-from MessageComponent import MessageComponent
+import base64
+from Structures.MessageComponent import MessageComponent
 from Algorithms.RSA import RSA
 
 
@@ -15,11 +16,13 @@ class SessionKeyComponent(MessageComponent):
 
     @staticmethod
     def encrypt_session_key(session_key, public_key):
+        session_key = base64.b64encode(session_key).decode("utf-8")
         return RSA.encrypt_message(session_key, public_key)
 
     @staticmethod
     def decrypt_session_key(enc_session_key, private_key):
-        return RSA.decrypt_message(enc_session_key, private_key)
+        result = RSA.decrypt_message(enc_session_key, private_key)
+        return base64.b64decode(result.encode("utf-8"))
 
     @staticmethod
     def create_session_key_component_object(session_string):

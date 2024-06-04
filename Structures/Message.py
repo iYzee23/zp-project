@@ -1,11 +1,11 @@
 import zlib
 import secrets
 import base64
-from PrivateRingRow import PrivateRingRow
-from PublicRingRow import PublicRingRow
-from SignatureComponent import SignatureComponent
-from SessionKeyComponent import SessionKeyComponent
-from Options import Options
+from Structures.PrivateRingRow import PrivateRingRow
+from Structures.PublicRingRow import PublicRingRow
+from Structures.SignatureComponent import SignatureComponent
+from Structures.SessionKeyComponent import SessionKeyComponent
+from Structures.Options import Options
 from Algorithms.SHA1 import SHA1
 from Algorithms.AES128 import AES128
 from Algorithms.DES3 import DES3
@@ -27,9 +27,18 @@ class Message:
     @staticmethod
     def create_message_object(message_string, options):
         lines = message_string.split('\n')
-        filename = lines[0].split('Filename: ')[1]
-        timestamp = lines[1].split('Timestamp: ')[1]
-        data = lines[2].split('Data: ')[1]
+        filename = None
+        timestamp = None
+        data = None
+
+        for line in lines:
+            if line.startswith('Filename: '):
+                filename = line.split('Filename: ')[1]
+            elif line.startswith('Timestamp: '):
+                timestamp = line.split('Timestamp: ')[1]
+            elif line.startswith('Data: '):
+                data = line.split('Data: ')[1]
+
         return Message(data, filename, timestamp, options)
 
     @staticmethod
@@ -37,7 +46,7 @@ class Message:
         return SHA1.generate_hash(data)
 
     @staticmethod
-    def generate_signature_component(message, sender_private_ring: PrivateRingRow, password):
+    def generate_signature_component(message, password, sender_private_ring: PrivateRingRow):
         key_id = sender_private_ring.key_id
         signature = Message.generate_signature(message.data)
         private_key = sender_private_ring.get_private_key(password)
@@ -74,6 +83,7 @@ class Message:
         if message.options.compression:
             byte_data = msg.encode("utf-8")
             msg = zlib.compress(byte_data)
+            msg = base64.b64encode(msg).decode("utf-8")
 
         if message.options.encryption:
             session_key = Message.generate_session_key(message.options.algorithm)
@@ -96,13 +106,13 @@ class Message:
             return DES3.decrypt_message(data, session_key)
 
     @staticmethod
-    def verify_signature(digest, data):
-        new_digest = Message.generate_signature(data)
-        return digest == new_digest
+    def verify_signature(enc_digest, public_key, data):
+        digest = Message.generate_signature(data)
+        return SignatureComponent.decrypt_digest(digest, enc_digest, public_key)
 
     @staticmethod
     def receive_message(msg: str, recepient_private_ring: PrivateRingRow, password, sender_public_ring: PublicRingRow):
-        options_str, msg = msg.split("#####\n")
+        options_str, msg = msg.split("#####\n", 1)
         options = Options.create_options_object(options_str)
 
         if options.radix64 == "True":
@@ -111,26 +121,26 @@ class Message:
             msg = byte_data.decode("utf8")
 
         if options.encryption == "True":
-            session_key_component_str, msg = msg.split("#####\n")
+            session_key_component_str, msg = msg.split("#####\n", 1)
             session_key_component = SessionKeyComponent.create_session_key_component_object(session_key_component_str)
             enc_session_key = session_key_component["enc_session_key"]
             private_key = recepient_private_ring.get_private_key(password)
             session_key = SessionKeyComponent.decrypt_session_key(enc_session_key, private_key)
-            msg = Message.decrypt_message(options.algoritm, session_key, msg)
+            msg = Message.decrypt_message(options.algorithm, session_key, msg)
 
         if options.compression == "True":
+            msg = base64.b64decode(msg.encode("utf-8"))
             byte_data = zlib.decompress(msg)
             msg = byte_data.decode("utf-8")
 
         message = Message.create_message_object(msg, options)
 
         if options.authentication == "True":
-            signature_component_str, msg = msg.split("#####\n")
+            signature_component_str, msg = msg.split("#####\n", 1)
             signature_component = SignatureComponent.create_signature_component_object(signature_component_str)
             enc_digest = signature_component["enc_digest"]
             public_key = sender_public_ring.public_key
-            digest = SignatureComponent.decrypt_digest(enc_digest, public_key)
-            if Message.verify_signature(digest, message.data):
+            if Message.verify_signature(enc_digest, public_key, message.data):
                 print("Successful verification!")
                 return message
             else:

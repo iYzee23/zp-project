@@ -1,3 +1,4 @@
+import base64
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 
@@ -9,7 +10,7 @@ class SHA1:
             data = data.encode("utf-8")
         digest = hashes.Hash(hashes.SHA1(), backend=default_backend())
         digest.update(data)
-        return digest.finalize()
+        return base64.b64encode(digest.finalize()).decode("utf-8")
 
     @staticmethod
     def compare_hashes(hash1, hash2):

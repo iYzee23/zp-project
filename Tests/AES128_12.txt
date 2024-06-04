@@ -1,0 +1,13 @@
+E[False]
+A[True]
+C[False]
+R[False]
+Algorithm[AES128]
+#####
+Timestamp: 2024-06-04 12:16:55.883925
+KeyID: 65537
+Digest: AwH0fUVtLaVTy5psPusZHxO0sR4JME8no4o/xlgveohXNT4HvCybBfSEExIyzi5iXwCEAX+JNJ25s86iIAztzQbf9quARCOuidacuPhJDx9AY8XU4JV0DN+2HpL0F/NVE632DC/fRgu4RS9/BVgx4n6cmyzEP+9uj99nrEesn9X+HGKk4x82JYkQaMCiJOe33S6XGswRDJix/PLHx7X/l3EveB8/T8bfXNZV59XPCuwyR6ZyLSmePm+PIdits5msx0xTbbVwfrBmKj3N8rrg38P2Yy7DEVjnToz2j72V4j4hN/RnVwXvs9hBeu1krFS6ynWJH+QoHX6IIcEgAEigNg==
+#####
+Filename: file.txt
+Timestamp: 2024-06-04 12:16:55.883925
+Data: Saljem veliki pozdrav svim dobrim ljudima ovog sveta! :)

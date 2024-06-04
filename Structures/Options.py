@@ -4,14 +4,14 @@ class Options:
         self.authentication = authentication
         self.compression = compression
         self.radix64 = radix64
-        self.algoritm = algorithm
+        self.algorithm = algorithm
 
     def __str__(self):
         str_encryption = f"E[{self.encryption}]\n"
         str_authentication = f"A[{self.authentication}]\n"
         str_compression = f"C[{self.compression}]\n"
         str_radix64 = f"R[{self.radix64}]\n"
-        str_algorithm = f"Algorithm[{self.algoritm}]\n"
+        str_algorithm = f"Algorithm[{self.algorithm}]\n"
         str_delimiter = f"#####\n"
         return str_encryption + str_authentication + str_compression + str_radix64 + str_algorithm + str_delimiter
 

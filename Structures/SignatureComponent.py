@@ -1,4 +1,5 @@
-from MessageComponent import MessageComponent
+import base64
+from Structures.MessageComponent import MessageComponent
 from Algorithms.RSA import RSA
 
 
@@ -15,11 +16,13 @@ class SignatureComponent(MessageComponent):
 
     @staticmethod
     def encrypt_digest(digest, private_key):
-        return RSA.encrypt_message(digest, private_key)
+        # return RSA.encrypt_message(digest, private_key)
+        return RSA.sign_message(digest, private_key)
 
     @staticmethod
-    def decrypt_digest(enc_digest, public_key):
-        return RSA.decrypt_message(enc_digest, public_key)
+    def decrypt_digest(digest, enc_digest, public_key):
+        # return RSA.decrypt_message(enc_digest, public_key)
+        return RSA.verify_signature(digest, enc_digest, public_key)
 
     @staticmethod
     def create_signature_component_object(signature_string):

@@ -1,0 +1,7 @@
+E[False]
+A[False]
+C[True]
+R[False]
+Algorithm[DES3]
+#####
+eJwNyTEOwjAMQNE9pzAjQ6s0NJXqGXEBuIBRDHKJSdWaCHF6Mv0n/YtkfpMywqOpt6+5myjvRroiBB/Gzk+dH2EIOEwYYz+f/OyjO5MRwpXywgqVs7wE1vJLG1XYqyikct9a8vJJogSllmcbbHQAPLo/3ZYmMA==

@@ -1,18 +1,37 @@
 import rsa
+import base64
 from Algorithms.FileUtil import FileUtil
 
 
 class RSA:
     @staticmethod
-    def encrypt_message(message, key):
-        return rsa.encrypt(message.encode("utf-8"), key)
+    def encrypt_message(message, public_key):
+        result = rsa.encrypt(message.encode("utf-8"), public_key)
+        return base64.b64encode(result).decode("utf-8")
 
     @staticmethod
-    def decrypt_message(cyphertext, key):
-        return rsa.decrypt(cyphertext, key).decode("utf-8")
+    def decrypt_message(cyphertext, private_key):
+        cyphertext = base64.b64decode(cyphertext.encode("utf-8"))
+        return rsa.decrypt(cyphertext, private_key).decode("utf-8")
 
     @staticmethod
-    def generate_key(size):
+    def sign_message(message, private_key):
+        message_bytes = message.encode('utf-8')
+        signature = rsa.sign(message_bytes, private_key, 'SHA-1')
+        return base64.b64encode(signature).decode('utf-8')
+
+    @staticmethod
+    def verify_signature(message, signature, public_key):
+        message_bytes = message.encode('utf-8')
+        signature_bytes = base64.b64decode(signature.encode('utf-8'))
+        try:
+            rsa.verify(message_bytes, signature_bytes, public_key)
+            return True
+        except rsa.VerificationError:
+            return False
+
+    @staticmethod
+    def generate_keys(size):
         return rsa.newkeys(size)  # Returns tuple, first is public key, second is private key
 
     @staticmethod

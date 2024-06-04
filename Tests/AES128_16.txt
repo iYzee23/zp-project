@@ -1,0 +1,9 @@
+E[False]
+A[False]
+C[False]
+R[False]
+Algorithm[AES128]
+#####
+Filename: file.txt
+Timestamp: 2024-06-04 12:16:55.937904
+Data: Saljem veliki pozdrav svim dobrim ljudima ovog sveta! :)
