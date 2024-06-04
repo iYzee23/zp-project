@@ -29,7 +29,7 @@ class GUI(tk.Tk):
         header_label = ttk.Label(login_frame, text="Login Page", font=("Helvetica", 20))
         header_label.grid(row=0, column=0, columnspan=2, pady=130, padx=240)
 
-        username_label = ttk.Label(login_frame, text="Email:", font=("Helvetica", 14))
+        username_label = ttk.Label(login_frame, text="Name###Email:", font=("Helvetica", 14))
         username_label.grid(row=1, column=0, padx=10, pady=10, sticky="e")
 
         self.username_entry = ttk.Entry(login_frame, font=("Helvetica", 14))
