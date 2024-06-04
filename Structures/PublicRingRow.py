@@ -5,7 +5,7 @@ class PublicRingRow:
     def __init__(self, public_key, name, mail):
         self.timestamp = datetime.datetime.now()
         self.public_key = public_key
-        self.key_id = public_key.e % (2**64)
+        self.key_id = public_key.n % (2**64)
         self.user_id = name + "###" + mail
 
     def __str__(self):

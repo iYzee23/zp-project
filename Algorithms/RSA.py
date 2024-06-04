@@ -35,7 +35,7 @@ class RSA:
         return rsa.newkeys(size)  # Returns tuple, first is public key, second is private key
 
     @staticmethod
-    def import_key():
+    def import_keys_tk():
         key_string = FileUtil.import_pem("KEYS")
         splitted = key_string.split('\t')
         public_key = rsa.PublicKey.load_pkcs1(splitted[0].encode("utf-8"))
@@ -43,20 +43,62 @@ class RSA:
         return (public_key, private_key)
 
     @staticmethod
-    def export_key(keys):
-        public_key = keys[0]
-        private_key = keys[1]
+    def import_keys(cnt):
+        with open(f"Keys/InitKeys/init_public_private_{cnt}.pem", 'r') as file:
+            pem_content = file.read()
+            start = f"-----BEGIN KEYS-----\n"
+            end = f"-----END KEYS-----\n"
+            pem_content = pem_content.replace(start, "").replace(end, "").strip()
+            base64_data = pem_content.encode("utf-8")
+            byte_data = base64.b64decode(base64_data)
+            key_string = byte_data.decode("utf-8")
+
+        splitted = key_string.split('\t')
+        public_key = rsa.PublicKey.load_pkcs1(splitted[0].encode("utf-8"))
+        private_key = rsa.PrivateKey.load_pkcs1(splitted[1].encode("utf-8"))
+        return (public_key, private_key)
+
+    @staticmethod
+    def export_keys_tk(public_key, private_key):
         public_key_string = public_key.save_pkcs1().decode("utf-8")
         private_key_string = private_key.save_pkcs1().decode("utf-8")
         key_string = f"{public_key_string}\t{private_key_string}"
         FileUtil.export_pem(key_string, "KEYS")
 
     @staticmethod
-    def import_public():
+    def export_keys(public_key, private_key, cnt):
+        public_key_string = public_key.save_pkcs1().decode("utf-8")
+        private_key_string = private_key.save_pkcs1().decode("utf-8")
+        key_string = f"{public_key_string}\t{private_key_string}"
+
+        with open(f"Keys/public_private_{cnt}.pem", 'w') as file:
+            byte_data = key_string.encode("utf-8")
+            base64_data = base64.b64encode(byte_data)
+            content = base64_data.decode("utf-8")
+            start = f"-----BEGIN KEYS-----\n"
+            end = f"-----END KEYS-----\n"
+            pem_content = f"{start}{content}\n{end}"
+            file.write(pem_content)
+
+    @staticmethod
+    def import_public_tk():
         key_string = FileUtil.import_pem("PUBLIC_KEY")
         return rsa.PublicKey.load_pkcs1(key_string.encode("utf-8"), format="PEM")
 
     @staticmethod
-    def export_public(key):
-        key_string = key.save_pkcs1(format="PEM").decode("utf-8")
+    def export_public_tk(public_key):
+        key_string = public_key.save_pkcs1(format="PEM").decode("utf-8")
         FileUtil.export_pem(key_string, "PUBLIC_KEY")
+
+    @staticmethod
+    def export_public(public_key, cnt):
+        key_string = public_key.save_pkcs1(format="PEM").decode("utf-8")
+
+        with open(f"Keys/public_{cnt}.pem", 'w') as file:
+            byte_data = key_string.encode("utf-8")
+            base64_data = base64.b64encode(byte_data)
+            content = base64_data.decode("utf-8")
+            start = f"-----BEGIN PUBLIC_KEY-----\n"
+            end = f"-----END PUBLIC_KEY-----\n"
+            pem_content = f"{start}{content}\n{end}"
+            file.write(pem_content)

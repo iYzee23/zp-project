@@ -6,8 +6,6 @@ from Algorithms.RSA import RSA
 from Algorithms.AES128 import AES128
 from Algorithms.DES3 import DES3
 from Structures.Message import Message
-from Structures.PublicRingRow import PublicRingRow
-from Structures.PrivateRingRow import PrivateRingRow
 from Structures.Options import Options
 from Global.Variables import private_rings, public_rings
 
@@ -37,10 +35,10 @@ def test_rsa():
     print(cyphertext)
     original_message = RSA.decrypt_message(cyphertext, private_key)
     print(original_message)
-    RSA.export_public(public_key)
-    print(RSA.import_public())
-    RSA.export_key((public_key, private_key))
-    print(RSA.import_key())
+    RSA.export_public_tk(public_key)
+    print(RSA.import_public_tk())
+    RSA.export_keys_tk(public_key, private_key)
+    print(RSA.import_keys_tk())
 
 
 def test_aes128():
@@ -98,7 +96,7 @@ def test_message_flow(enc, auth, compr, radix, alg, cnt):
     for row in private_rings[sender].get_rows().values():
         sender_key_id = row.key_id
         break
-    for row in public_rings[sender].get_rows().values():
+    for row in private_rings[recipient].get_rows().values():
         recipient_key_id = row.key_id
         break
     test_message_sending(enc, auth, compr, radix, alg, sender, sender_key_id, recipient_key_id, cnt)
@@ -114,3 +112,49 @@ def test_message_flow_all_variants():
                     cnt += 1
                     for alg in ["AES128", "DES3"]:
                         test_message_flow(enc, auth, compr, radix, alg, cnt)
+
+
+def test_keys_generation():
+    keys = []
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+    keys.append(RSA.generate_keys(1024))
+    keys.append(RSA.generate_keys(2048))
+
+    for i in range(26):
+        public_key = keys[i][0]
+        private_key = keys[i][1]
+        RSA.export_keys(public_key, private_key, i + 1)
+        RSA.export_public(public_key, i + 1)
+
+
+def test_public_private_rings():
+    for private_ring in private_rings.values():
+        print(private_ring)
+        print()
+
+    for public_ring in public_rings.values():
+        print(public_ring)
+        print()

@@ -1,12 +1,12 @@
 ----------------------------------------------------
 
-FileUtil +
+FileUtil
 ### data
 ### pem_type
---> import_PEM +
---> export_PEM +
---> import_message +
---> export_message +
+--> import_PEM
+--> export_PEM
+--> import_message
+--> export_message
 
 ----------------------------------------------------
 
@@ -16,32 +16,32 @@ SHA1
 --> generateHash
 --> compareHashes
 
-RSA [Algorithm] +
+RSA [Algorithm]
 ### key
 ### message
 ### cypher
 ### size (1024/2048)
---> generate_keys +
---> importKey +
---> exportKey +
---> importPublic +
---> exportPublic +
---> encrypt_message +
---> decrypt_message +
+--> generate_keys
+--> importKey
+--> exportKey
+--> importPublic
+--> exportPublic
+--> encrypt_message
+--> decrypt_message
 
-3DES [Algorithm] +
+3DES [Algorithm]
 ### key
 ### message
 ### cypher
---> encryptMessage +
---> decryptMessage +
+--> encryptMessage
+--> decryptMessage
 
-AES128 [Algorithm] +
+AES128 [Algorithm]
 ### key
 ### message
 ### cypher
---> encryptMessage +
---> decryptMessage +
+--> encryptMessage
+--> decryptMessage
 
 ----------------------------------------------------
 
@@ -121,5 +121,31 @@ Message
 ### on frontend, we have field: Algorithm
 ### based on that value, we fill Algorithm field in Message
 ### based on that value, we apply correspondent Encryption/Decryption
+
+----------------------------------------------------
+
+6 users
+--> each one has it's own PrivateRing
+--> each PrivateRing is initialized with one PrivateRingRow
+--> each one has it's own PublicRing
+--> each PublicRing is initialized with five PublicRingRows
+
+(1) Pavle Vuletic [2048]
+(2) Maja Vukasovic [2048]
+(3) Adrian Milakovic [2048]
+(4) Teodora Radaljac [2048]
+(5) Luka Nevajda [1024]
+(6) Predrag Pesic [1024]
+
+--> when I log in, I can import PrivateRingRow or PublicRingRow
+--> importing PrivateRingRow, we're updating the PrivateRing
+--> importing PublicRingRow, we're updating the PublicRing
+
+--> when sending message: MyKeyID and RecipientKeyID
+*** MyKeyID must be in my PrivateRing
+*** RecipientKeyID must be in my PublicRing
+--> when receiving message: MyKeyID and SenderKeyID
+*** MyKeyID must be in my PrivateRing
+*** SenderKeyID must be in my PublicRing
 
 ----------------------------------------------------

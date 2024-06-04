@@ -10,6 +10,7 @@ class PrivateRingRow(PublicRingRow):
         super().__init__(public_key, name, mail)
         self.algorithm = algorithm
         self.hashed_password = self.hash_password(password)
+        # hp = self.hashed_password[:16] if self.algorithm == "AES128" else self.hashed_password
         self.encrypted_private_key = self.encrypt_private_key(private_key, self.hashed_password[:16])
 
     def verify_password(self, password):
@@ -19,6 +20,7 @@ class PrivateRingRow(PublicRingRow):
     def get_private_key(self, password):
         hashed_password = self.hash_password(password)
         if hashed_password == self.hashed_password:
+            # hp = self.hashed_password[:16] if self.algorithm == "AES128" else self.hashed_password
             return self.decrypt_private_key(self.encrypted_private_key, self.hashed_password[:16])
         return None
 
