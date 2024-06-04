@@ -1,5 +1,4 @@
-from Global.Testing import *
-
+from gui import GUI
 
 # test_imports_exports()
 # test_rsa()
@@ -10,3 +9,6 @@ from Global.Testing import *
 # test_message_flow_all_variants()
 # test_keys_generation()
 # test_public_private_rings()
+
+app = GUI()
+app.mainloop()
