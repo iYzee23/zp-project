@@ -1,6 +1,6 @@
+import platform
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-
 
 class GUI(tk.Tk):
     def __init__(self):
@@ -73,12 +73,42 @@ class GUI(tk.Tk):
 
     def create_menu(self):
         menu_bar = tk.Menu(self)
-        menu_bar.add_command(label="Keys", command=self.show_keys_page)
-        menu_bar.add_command(label="Private Ring", command=self.show_private_ring_page)
-        menu_bar.add_command(label="Public Ring", command=self.show_public_ring_page)
-        menu_bar.add_command(label="Send Message", command=self.show_send_message_page)
-        menu_bar.add_command(label="Receive Message", command=self.show_receive_message_page)
-        menu_bar.add_command(label="Logout", command=self.logout)
+        os_name = platform.system()
+
+        if os_name == "Windows":
+            menu_bar = tk.Menu(self)
+            menu_bar.add_command(label="Keys", command=self.show_keys_page)
+            menu_bar.add_command(label="Private Ring", command=self.show_private_ring_page)
+            menu_bar.add_command(label="Public Ring", command=self.show_public_ring_page)
+            menu_bar.add_command(label="Send Message", command=self.show_send_message_page)
+            menu_bar.add_command(label="Receive Message", command=self.show_receive_message_page)
+            menu_bar.add_command(label="Logout", command=self.logout)
+
+        else:
+            keys_menu = tk.Menu(menu_bar, tearoff=0)
+            keys_menu.add_command(label="Keys", command=self.show_keys_page)
+            menu_bar.add_cascade(label="Keys", menu=keys_menu)
+
+            private_ring_menu = tk.Menu(menu_bar, tearoff=0)
+            private_ring_menu.add_command(label="Private Ring", command=self.show_private_ring_page)
+            menu_bar.add_cascade(label="Private Ring", menu=private_ring_menu)
+
+            public_ring_menu = tk.Menu(menu_bar, tearoff=0)
+            public_ring_menu.add_command(label="Public Ring", command=self.show_public_ring_page)
+            menu_bar.add_cascade(label="Public Ring", menu=public_ring_menu)
+
+            send_message_menu = tk.Menu(menu_bar, tearoff=0)
+            send_message_menu.add_command(label="Send Message", command=self.show_send_message_page)
+            menu_bar.add_cascade(label="Send Message", menu=send_message_menu)
+
+            receive_message_menu = tk.Menu(menu_bar, tearoff=0)
+            receive_message_menu.add_command(label="Receive Message", command=self.show_receive_message_page)
+            menu_bar.add_cascade(label="Receive Message", menu=receive_message_menu)
+
+            logout_menu = tk.Menu(menu_bar, tearoff=0)
+            logout_menu.add_command(label="Logout", command=self.logout)
+            menu_bar.add_cascade(label="Logout", menu=logout_menu)
+
         self.config(menu=menu_bar)
 
     def create_keys_page(self):
