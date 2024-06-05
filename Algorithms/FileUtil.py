@@ -21,6 +21,8 @@ class FileUtil:
                 print(f"File is loaded from: {file_path}")
                 return content
 
+        return None
+
     @staticmethod
     def export_message(data):
         root = tk.Tk()
@@ -59,6 +61,8 @@ class FileUtil:
                 content = byte_data.decode("utf-8")
                 print(f"File is loaded from: {file_path}")
                 return content
+
+        return None
 
     @staticmethod
     def export_pem(data, pem_type):

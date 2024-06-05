@@ -1,6 +1,8 @@
 import platform
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
+from Global.Variables import private_rings, public_rings, users
+from Algorithms.RSA import RSA
 
 class GUI(tk.Tk):
     def __init__(self):
@@ -44,7 +46,7 @@ class GUI(tk.Tk):
     def check_login(self):
         username = self.username_entry.get()
         if self.validate_username(username):
-            self.username_entry.delete(0, tk.END)
+            # self.username_entry.delete(0, tk.END)
             if self.error_label:
                 self.error_label.destroy()
                 self.error_label = None
@@ -60,16 +62,30 @@ class GUI(tk.Tk):
             self.error_label.grid(row=3, column=0, columnspan=2, pady=5)
 
     def validate_username(self, username):
-        # Placeholder for the logic
-        return username == "admin"
+        for user in users:
+            if(user[1]+"###"+user[2]) == username:
+                return True
+        return False
+
+    def get_user(self):
+        username = self.username_entry.get()
+        for user in users:
+            if(user[1]+"###"+user[2]) == username:
+                return user
+        return None
 
     def create_main_application(self):
+        self.import_data()
         self.create_menu()
         self.create_keys_page()
         self.create_private_ring_page()
         self.create_public_ring_page()
         self.create_send_message_page()
         self.create_receive_message_page()
+    def import_data(self):
+        self.user = self.get_user()
+        self.public_ring = public_rings[self.user[1] + "###" + self.user[2]]
+        self.private_ring = private_rings[self.user[1] + "###" + self.user[2]]
 
     def create_menu(self):
         menu_bar = tk.Menu(self)
@@ -135,11 +151,13 @@ class GUI(tk.Tk):
         self.key_size.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
         ttk.Label(parent, text="Email:").grid(row=1, column=2, padx=5, pady=5, sticky="w")
-        self.email_entry = ttk.Entry(parent)
+        self.email_var=tk.StringVar(value=self.user[2])
+        self.email_entry = ttk.Entry(parent, textvariable=self.email_var, state='readonly')
         self.email_entry.grid(row=1, column=3, padx=5, pady=5, sticky="w")
 
         ttk.Label(parent, text="Name:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
-        self.name_entry = ttk.Entry(parent)
+        self.name_var = tk.StringVar(value=self.user[1])
+        self.name_entry = ttk.Entry(parent, textvariable=self.name_var, state='readonly')
         self.name_entry.grid(row=2, column=1, padx=5, pady=5, sticky="w")
 
         ttk.Label(parent, text="Password:").grid(row=2, column=2, padx=5, pady=5, sticky="w")
@@ -157,10 +175,13 @@ class GUI(tk.Tk):
         import_both_button.grid(row=5, column=2, columnspan=2, pady=10)
 
     def create_export_keys_section(self, parent):
-        self.export_public_selection = ttk.Combobox(parent)
+        public_values = [str(row.key_id) for row in self.public_ring.ring.values()]
+        private_values = [str(row.key_id) for row in self.private_ring.ring.values()]
+
+        self.export_public_selection = ttk.Combobox(parent, values=public_values)
         self.export_public_selection.grid(row=9, column=0, columnspan=2, padx=10, pady=5)
 
-        self.export_both_selection = ttk.Combobox(parent)
+        self.export_both_selection = ttk.Combobox(parent, values=private_values)
         self.export_both_selection.grid(row=9, column=2, columnspan=2, padx=10, pady=5)
 
         export_public_button = ttk.Button(parent, text="Export Public key", command=self.export_public_key)
@@ -170,10 +191,13 @@ class GUI(tk.Tk):
         export_both_button.grid(row=10, column=2, columnspan=2, pady=10)
 
     def create_delete_keys_section(self, parent):
-        self.delete_public_selection = ttk.Combobox(parent)
+        public_values = [str(row.key_id) for row in self.public_ring.ring.values()]
+        private_values = [str(row.key_id) for row in self.private_ring.ring.values()]
+
+        self.delete_public_selection = ttk.Combobox(parent, values=public_values)
         self.delete_public_selection.grid(row=13, column=0, columnspan=2, padx=10, pady=5)
 
-        self.delete_both_selection = ttk.Combobox(parent)
+        self.delete_both_selection = ttk.Combobox(parent, values=private_values)
         self.delete_both_selection.grid(row=13, column=2, columnspan=2, padx=10, pady=5)
 
         delete_public_button = ttk.Button(parent, text="Delete Public key", command=self.delete_public_key)
@@ -201,18 +225,41 @@ class GUI(tk.Tk):
         text_widget.configure(yscrollcommand=scrollbar.set)
 
         text_widget.insert("end", "-" * 80 + "\n")
-        for i in range(1, 21):
+        i=0
+        for row in self.private_ring.ring.values():
             text_widget.insert("end", f"Private Ring Entry {i}\n")
+            text_widget.insert("end", f"{str(row)}")
             text_widget.insert("end", "-" * 80 + "\n")
-        text_widget.configure(state="disabled")
+            i+=1
 
         button_frame = ttk.Frame(private_ring_frame)
         button_frame.pack(pady=10)
 
-        view_button = ttk.Button(button_frame, text="View more details")
+        view_button = ttk.Button(button_frame, text="View more details", command=self.create_private_key_modal_page)
         view_button.pack()
 
+    def create_private_key_modal_page(self):
+        private_values = [str(row.key_id) for row in self.private_ring.ring.values()]
+
+
+        self.private_key_modal = tk.Toplevel(self)
+        self.private_key_modal.title("Private Key Modal")
+        self.private_key_modal.geometry("300x200")
+        self.private_key_modal.grab_set()  # Makes the modal window modal
+
+        ttk.Label(self.private_key_modal, text="Select key-id option:").grid(row=0, column=0, padx=10, pady=10)
+        self.modal_private_selection = ttk.Combobox(self.private_key_modal, values=private_values)
+        self.modal_private_selection.grid(row=0, column=1, padx=10, pady=10)
+
+        ttk.Label(self.private_key_modal, text="Enter password:").grid(row=1, column=0, padx=10, pady=10)
+        self.modal_password_entry = ttk.Entry(self.private_key_modal, show="*")
+        self.modal_password_entry.grid(row=1, column=1, padx=10, pady=10)
+
+        self.modal_submit_button = ttk.Button(self.private_key_modal, text="See private key", command=self.show_private_key)
+        self.modal_submit_button.grid(row=2, column=0, columnspan=2, pady=20)
+
     def create_public_ring_page(self):
+
         public_ring_frame = ttk.Frame(self.container)
         public_ring_frame.grid(row=0, column=0, sticky="nsew")
         self.pages["Public Ring"] = public_ring_frame
@@ -231,9 +278,12 @@ class GUI(tk.Tk):
         text_widget.configure(yscrollcommand=scrollbar.set)
 
         text_widget.insert("end", "-" * 80 + "\n")
-        for i in range(1, 21):
+        i=0
+        for row in self.public_ring.ring.values():
             text_widget.insert("end", f"Public Ring Entry {i}\n")
+            text_widget.insert("end", f"{str(row)}")
             text_widget.insert("end", "-" * 80 + "\n")
+            i+=1
         text_widget.configure(state="disabled")
 
     def create_send_message_page(self):
@@ -414,35 +464,113 @@ class GUI(tk.Tk):
             messagebox.showinfo("Success", "Message saved successfully!")
 
     def logout(self):
+        self.username_entry.delete(0, tk.END)
         self.show_page("Login")
 
     def delete_public_key(self):
-        # Placeholder for logic
-        self.status_label.config(text="Public key deleted successfully!", foreground="green")
+        value = self.delete_public_selection.get()
+        if value != "":
+            for row in self.public_ring.ring.values():
+                if row.key_id == int(value):
+                    del self.public_ring.ring[row.key_id]
+                    self.create_main_application()
+                    self.show_page("Keys")
+
+                    self.status_label.config(text="Public key deleted successfully!", foreground="green")
+                    return
+
+        self.status_label.config(text="You must choose key id!", foreground="red")
 
     def delete_both_keys(self):
-        # Placeholder for logic
-        self.status_label.config(text="Private and public keys deleted successfully!", foreground="green")
+        value = self.delete_both_selection.get()
+        if value != "":
+            for row in self.private_ring.ring.values():
+                if row.key_id == int(value):
+                    del self.private_ring.ring[row.key_id]
+                    self.create_main_application()
+                    self.show_page("Keys")
+
+                    self.status_label.config(text="Private and public keys deleted successfully!", foreground="green")
+                    return
+
+        self.status_label.config(text="You must choose key id!", foreground="red")
 
     def import_public_key(self):
-        # Placeholder for logic
-        self.status_label.config(text="Public key imported successfully!", foreground="green")
+        try:
+            row = RSA.import_public_ring_row_tk()
+
+            if row is not None:
+                self.public_ring.ring[row.key_id] = row
+
+                self.create_main_application()
+                self.show_page("Keys")
+
+                self.status_label.config(text="Public key imported successfully!", foreground="green")
+
+        except ValueError as e:
+            print(f"Caught exception: {e}")
 
     def import_both_keys(self):
-        # Placeholder for logic
-        self.status_label.config(text="Private and public keys imported successfully!", foreground="green")
+        try:
+            row = RSA.import_private_ring_row_tk(self.user[0])
+
+            if row is not None:
+                if row.user_id != (self.user[1] + "###" + self.user[2]):
+                    self.status_label.config(text="Private key does not belong to this user!", foreground="red")
+                else:
+                    self.private_ring.ring[row.key_id] = row
+
+                    self.create_main_application()
+                    self.show_page("Keys")
+
+                    self.status_label.config(text="Private and public keys imported successfully!", foreground="green")
+
+        except ValueError as e:
+            print(f"Caught exception: {e}")
 
     def export_public_key(self):
-        # Placeholder for logic
-        self.status_label.config(text="Public key exported successfully!", foreground="green")
+        value = self.export_public_selection.get()
+        if value != "":
+            for row in self.public_ring.ring.values():
+                if row.key_id == int(value):
+                    RSA.export_public_ring_row_tk(row)
+                    self.create_main_application()
+                    self.show_page("Keys")
+
+                    self.status_label.config(text="Public key exported successfully!", foreground="green")
+                    return
+
+        self.status_label.config(text="You must choose key id!", foreground="red")
 
     def export_both_keys(self):
-        # Placeholder for logic
-        self.status_label.config(text="Private and public keys exported successfully!", foreground="green")
+        value = self.export_both_selection.get()
+        if value != "":
+            for row in self.private_ring.ring.values():
+                if row.key_id == int(value):
+                    RSA.export_private_ring_row_tk(row, self.user[0])
+
+                    self.create_main_application()
+                    self.show_page("Keys")
+
+                    self.status_label.config(text="Both keys exported successfully!", foreground="green")
+                    return
+
+        self.status_label.config(text="You must choose key id!", foreground="red")
 
     def generate_keys(self):
-        # Placeholder for logic
-        self.status_label.config(text="Keys generated successfully!", foreground="green")
+        if self.user[0]!=self.password_entry.get():
+            self.status_label.config(text="Wrong password!", foreground="red")
+            self.password_entry.delete(0, tk.END)
+        elif self.key_size.get() == "":
+            self.password_entry.delete(0, tk.END)
+            self.status_label.config(text="Key size not chosen!", foreground="red")
+        else:
+            (public_key, private_key) =RSA.generate_keys(int(self.key_size.get()))
+            self.public_ring.add_row(public_key, self.user[1], self.user[2])
+            self.private_ring.add_row(public_key, private_key, self.user[0], self.user[1], self.user[2], self.user[3])
+            self.create_main_application()
+            self.show_page("Keys")
+            self.status_label.config(text="Keys generated successfully!", foreground="green")
 
     def show_keys_page(self):
         frame = self.pages["Keys"]
@@ -451,6 +579,21 @@ class GUI(tk.Tk):
     def show_private_ring_page(self):
         frame = self.pages["Private Ring"]
         frame.tkraise()
+
+    def show_private_key(self):
+        key_id = self.modal_private_selection.get()
+        password = self.modal_password_entry.get()
+        self.private_key_modal.destroy()
+        if key_id != "":
+            for row in self.private_ring.ring.values():
+                if row.key_id == int(key_id):
+                    private_key =row.get_private_key(password)
+                    if(private_key is not None):
+                        messagebox.showinfo("Private Key", private_key)
+                        return
+                    messagebox.showerror("Private Key", "Password is incorrect. Please try again.!")
+        else:
+            messagebox.showerror("Private Key", "Key-id field is empty!")
 
     def show_public_ring_page(self):
         frame = self.pages["Public Ring"]

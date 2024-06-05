@@ -1,6 +1,11 @@
+import binascii
+import datetime
+
 import rsa
 import base64
 from Algorithms.FileUtil import FileUtil
+from Structures.PublicRingRow import PublicRingRow
+from Structures.PrivateRingRow import PrivateRingRow
 
 
 class RSA:
@@ -102,3 +107,68 @@ class RSA:
             end = f"-----END PUBLIC_KEY-----\n"
             pem_content = f"{start}{content}\n{end}"
             file.write(pem_content)
+
+    @staticmethod
+    def import_private_ring_row_tk(password):
+        try:
+            private_ring_row_string = FileUtil.import_pem("KEYS")
+
+            if private_ring_row_string is not None:
+                split_string = private_ring_row_string.split("\t")
+
+
+                timestamp = datetime.datetime.strptime(split_string[0], "%Y-%m-%d %H:%M:%S.%f")
+                public_key = rsa.PublicKey.load_pkcs1(split_string[1].encode("utf-8"), format="PEM")
+                algorithm = split_string[3]
+                private_key = rsa.PrivateKey.load_pkcs1(split_string[4].encode("utf-8"))
+                private_ring_row = PrivateRingRow(public_key, private_key, password, "", "", algorithm)
+                private_ring_row.timestamp = timestamp
+                private_ring_row.user_id = split_string[2]
+
+                return private_ring_row
+
+            return None
+
+        except binascii.Error as e:
+            raise ValueError("This .pem file is not in a correct format") from e
+
+    @staticmethod
+    def import_public_ring_row_tk():
+        try:
+            public_ring_row_string = FileUtil.import_pem("PUBLIC_KEY")
+
+            if public_ring_row_string is not None:
+                split_string = public_ring_row_string.split("\t")
+                timestamp = datetime.datetime.strptime(split_string[0], "%Y-%m-%d %H:%M:%S.%f")
+                public_key = rsa.PublicKey.load_pkcs1(split_string[1].encode("utf-8"), format="PEM")
+                public_ring_row = PublicRingRow(public_key, "", "")
+                public_ring_row.timestamp = timestamp
+                public_ring_row.user_id = split_string[2]
+
+                return public_ring_row
+
+            return None
+
+        except binascii.Error as e:
+            raise ValueError("This .pem file is not in a correct format") from e
+
+    @staticmethod
+    def export_public_ring_row_tk(public_ring_row):
+        str_timestamp = str(public_ring_row.timestamp)
+        str_public_key = public_ring_row.public_key.save_pkcs1(format="PEM").decode("utf-8")
+        str_user_id = str(public_ring_row.user_id)
+        public_ring_row_string = f"{str_timestamp}\t{str_public_key}\t{str_user_id}"
+
+        FileUtil.export_pem(public_ring_row_string, "PUBLIC_KEY")
+
+    @staticmethod
+    def export_private_ring_row_tk(private_ring_row, password):
+        str_timestamp = str(private_ring_row.timestamp)
+        str_public_key = private_ring_row.public_key.save_pkcs1(format="PEM").decode("utf-8")
+        str_user_id = str(private_ring_row.user_id)
+        str_algorithm = str(private_ring_row.algorithm)
+        private_key = private_ring_row.get_private_key(password)
+        str_private_key = private_key.save_pkcs1(format="PEM").decode("utf-8")
+        private_ring_row_string = f"{str_timestamp}\t{str_public_key}\t{str_user_id}\t{str_algorithm}\t{str_private_key}"
+
+        FileUtil.export_pem(private_ring_row_string, "KEYS")
