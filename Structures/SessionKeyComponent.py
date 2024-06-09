@@ -27,6 +27,8 @@ class SessionKeyComponent(MessageComponent):
     @staticmethod
     def create_session_key_component_object(session_string):
         lines = session_string.split('\n')
+        if len(lines) != 4:
+            raise ValueError("Invalid session")
         key_id = lines[1].split('KeyID: ')[1]
         session_key = lines[2].split('SessionKey: ')[1]
         return {

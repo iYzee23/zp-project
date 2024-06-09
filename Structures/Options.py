@@ -18,9 +18,12 @@ class Options:
     @staticmethod
     def create_options_object(options_string):
         lines = options_string.split('\n')
+        if len(lines) != 6:
+            raise ValueError("Invalid options")
         encryption = lines[0].split('[')[1][:-1]
         authentication = lines[1].split('[')[1][:-1]
         compression = lines[2].split('[')[1][:-1]
         radix64 = lines[3].split('[')[1][:-1]
         algorithm = lines[4].split('[')[1][:-1]
+
         return Options(encryption, authentication, compression, radix64, algorithm)

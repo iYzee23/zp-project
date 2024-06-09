@@ -1,8 +1,13 @@
 import platform
+import datetime
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
+from tkinter.scrolledtext import ScrolledText
 from Global.Variables import private_rings, public_rings, users
 from Algorithms.RSA import RSA
+from Algorithms.FileUtil import FileUtil
+from Structures.Options import Options
+from Structures.Message import Message
 
 class GUI(tk.Tk):
     def __init__(self):
@@ -82,6 +87,7 @@ class GUI(tk.Tk):
         self.create_public_ring_page()
         self.create_send_message_page()
         self.create_receive_message_page()
+
     def import_data(self):
         self.user = self.get_user()
         self.public_ring = public_rings[self.user[1] + "###" + self.user[2]]
@@ -351,6 +357,7 @@ class GUI(tk.Tk):
         ttk.Label(options_frame, text="Select User for Encryption:").grid(row=1, column=0, sticky="w", pady=3)
         self.enc_user_combo = ttk.Combobox(options_frame)
         self.enc_user_combo.grid(row=1, column=1, sticky="w", padx=(5, 0), pady=3)
+        self.enc_user_combo.bind("<<ComboboxSelected>>", self.toggle_user_key_id)
         self.enc_user_combo.config(state="disabled")
 
         ttk.Label(options_frame, text="Select KeyID for Encryption:").grid(row=2, column=0, sticky="w", pady=3)
@@ -364,36 +371,80 @@ class GUI(tk.Tk):
         self.algorithm_combo.config(state="disabled")
 
         ttk.Label(send_message_frame, text="Message:").grid(row=1, column=0, columnspan=2, sticky="w", padx=10)
-        self.message_text = tk.Text(send_message_frame, width=80, height=15)
-        self.message_text.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        self.send_message_text = tk.Text(send_message_frame, width=80, height=15)
+        self.send_message_text.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
         send_button = ttk.Button(send_message_frame, text="Send Message", command=self.send_message)
         send_button.grid(row=3, column=0, columnspan=2, pady=10)
 
     def toggle_authentication(self):
         if self.auth_var.get():
-            self.auth_keyid_combo.config(state="normal")
+
+            self.auth_keyid_combo.config(state="normal", values=[str(row.key_id) for row in self.private_ring.ring.values()])
         else:
             self.auth_keyid_combo.config(state="disabled")
 
     def toggle_encryption(self):
         if self.enc_var.get():
-            self.enc_user_combo.config(state="normal")
+            self.enc_user_combo.config(state="normal", values=[row.user_id for row in self.public_ring.ring.values()])
             self.enc_keyid_combo.config(state="normal")
-            self.algorithm_combo.config(state="normal")
+            self.algorithm_combo.config(state="normal", values=["AES128", "DES3"])
         else:
             self.enc_user_combo.config(state="disabled")
             self.enc_keyid_combo.config(state="disabled")
             self.algorithm_combo.config(state="disabled")
 
+    def toggle_user_key_id(self, event):
+        if self.enc_user_combo.get() != "":
+            key_id_values = [row.key_id for row in self.public_ring.ring.values() if row.user_id == self.enc_user_combo.get()]
+            self.enc_keyid_combo["values"] = key_id_values
+
     def send_message(self):
+        error_string = ""
+
+        if self.auth_var.get() == True:
+            if self.auth_keyid_combo.get() == '':
+                error_string += "No private key selected!\n"
+
+        if self.enc_var.get() == True:
+            if self.enc_user_combo.get() == '':
+                error_string += "No user selected!\n"
+
+            if self.enc_user_combo.get() != '' and self.enc_keyid_combo.get() == '':
+                error_string += "No user's public key selected!\n"
+
+            if self.algorithm_combo.get() == '':
+                error_string += "No algorithm selected!\n"
+
+            for row in self.public_ring.ring.values():
+                if row.user_id == self.enc_user_combo.get() and row.key_id != int(self.enc_keyid_combo.get()):
+                    error_string += "The selected public key does not belong to the selected user!\n"
+        if error_string != "":
+            messagebox.showerror("Error", error_string)
+            return
+        options = Options(self.enc_var.get(), self.auth_var.get(), self.comp_var.get(), self.radix_var.get(), self.algorithm_combo.get())
+        message = Message(self.send_message_text.get("1.0", 'end-1c'), None, datetime.datetime.now(), options)
+
+        sender_ring_row = None
+        recipient_ring_row = None
+        if self.auth_var.get() == True:
+            for row in self.private_ring.ring.values():
+                if row.key_id == int(self.auth_keyid_combo.get()):
+                    sender_ring_row = row
+        if self.enc_var.get() == True:
+            for row in self.public_ring.ring.values():
+                if row.key_id == int(self.enc_keyid_combo.get()):
+                    recipient_ring_row = row
+
         filename = filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
         )
         if filename:
-            with open(filename, 'w') as file:
-                file.write(self.message_text.get("1.0", tk.END))
+            message.filename = filename
+            message_string = Message.send_message(message, sender_ring_row, self.user[0], recipient_ring_row)
+            FileUtil.export_message(filename, message_string)
+
             messagebox.showinfo("Success", "Message sent successfully!")
 
     def create_receive_message_page(self):
@@ -419,15 +470,17 @@ class GUI(tk.Tk):
         self.radix_label = ttk.Label(labels_frame, text="Radix64 [option]", font=("Helvetica", 10), foreground="black")
         self.radix_label.grid(row=3, column=0, sticky="w", pady=5)
 
-        self.auth_result_label = ttk.Label(labels_frame, text="", font=("Helvetica", 10))
-        self.auth_result_label.grid(row=4, column=0, sticky="w", pady=5)
-
         self.enc_algo_label = ttk.Label(labels_frame, text="", font=("Helvetica", 10))
-        self.enc_algo_label.grid(row=5, column=0, sticky="w", pady=5)
+        self.enc_algo_label.grid(row=4, column=0, sticky="w", pady=5)
+
+        self.result_label = ttk.Label(labels_frame, text="", font=("Helvetica", 10))
+        self.result_label.grid(row=5, column=0, sticky="w", pady=5)
+
+
 
         ttk.Label(receive_message_frame, text="Message:").grid(row=1, column=0, columnspan=2, sticky="w", padx=10)
-        self.message_text = tk.Text(receive_message_frame, width=80, height=15)
-        self.message_text.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        self.received_message_text = tk.Text(receive_message_frame, width=80, height=15)
+        self.received_message_text.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
         buttons_frame = ttk.Frame(receive_message_frame)
         buttons_frame.grid(row=3, column=0, columnspan=2, pady=10)
@@ -439,28 +492,68 @@ class GUI(tk.Tk):
         save_button.grid(row=0, column=1, padx=5)
 
     def receive_message(self):
-        message = "This is a received message."
-        self.message_text.configure(state="normal")
-        self.message_text.delete("1.0", tk.END)
-        self.message_text.insert(tk.END, message)
-        self.message_text.configure(state="disabled")
+        try:
+            message_string = FileUtil.import_message()
 
-        self.auth_label.configure(foreground="blue")
-        self.enc_label.configure(foreground="blue")
-        self.comp_label.configure(foreground="blue")
-        self.radix_label.configure(foreground="blue")
+            if message_string is not None:
+                message = Message.receive_message(message_string, self.private_ring, self.user[0], self.public_ring)
+                self.received_message_text.configure(state="normal")
+                self.received_message_text.delete("1.0", tk.END)
+                self.received_message_text.insert(tk.END, message)
+                self.received_message_text.configure(state="disabled")
 
-        self.auth_result_label.configure(text="Unsuccessful verification", foreground="red")
-        self.enc_algo_label.configure(text="AES128", foreground="green")
+                options = message.options
+
+                if options.authentication == "True":
+                    self.auth_label.configure(text="Authentication/Signature present")
+                    self.auth_label.configure(foreground="green")
+
+                elif options.authentication == "False":
+                    self.auth_label.configure(text="Authentication/Signature not present")
+                    self.auth_label.configure(foreground="red")
+
+                if options.encryption == "True":
+                    self.enc_label.configure(text="Encryption present")
+                    self.enc_label.configure(foreground="green")
+                    self.enc_algo_label.configure(text=options.algorithm)
+                    self.enc_algo_label.configure(foreground="green")
+
+                elif options.encryption == "True":
+                    self.enc_label.configure(text="Encryption not present")
+                    self.enc_label.configure(foreground="red")
+                    self.enc_algo_label.configure(text="")
+
+                if options.compression == "True":
+                    self.comp_label.configure(text="Compression present")
+                    self.comp_label.configure(foreground="green")
+
+                elif options.compression == "False":
+                    self.comp_label.configure(text="Compression not present")
+                    self.comp_label.configure(foreground="red")
+
+                if options.radix64 == "True":
+                    self.radix_label.configure(text="Radix present")
+                    self.radix_label.configure(foreground="green")
+
+                elif options.radix64 == "False":
+                    self.radix_label.configure(text="Radix not present")
+                    self.radix_label.configure(foreground="red")
+
+                self.result_label.configure(text="Message successfully received!", foreground="green")
+
+        except ValueError as e:
+            self.result_label.configure(text=f"{e}", foreground="red")
 
     def save_message(self):
+
         filename = filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
         )
         if filename:
+            FileUtil.export_message(filename, self.received_message_text.get("1.0", tk.END))
             with open(filename, 'w') as file:
-                file.write(self.message_text.get("1.0", tk.END))
+                file.write(self.received_message_text.get("1.0", tk.END))
             messagebox.showinfo("Success", "Message saved successfully!")
 
     def logout(self):

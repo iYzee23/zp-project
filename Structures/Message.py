@@ -1,6 +1,8 @@
 import zlib
 import secrets
 import base64
+from Structures.PrivateRing import PrivateRing
+from Structures.PublicRing import PublicRing
 from Structures.PrivateRingRow import PrivateRingRow
 from Structures.PublicRingRow import PublicRingRow
 from Structures.SignatureComponent import SignatureComponent
@@ -111,9 +113,17 @@ class Message:
         return SignatureComponent.decrypt_digest(digest, enc_digest, public_key)
 
     @staticmethod
-    def receive_message(msg: str, recepient_private_ring: PrivateRingRow, password, sender_public_ring: PublicRingRow):
-        options_str, msg = msg.split("#####\n", 1)
-        options = Options.create_options_object(options_str)
+    def receive_message(msg: str, recipient_private_ring: PrivateRing, password, sender_public_ring: PublicRing):
+        options_split = msg.split("#####\n", 1)
+        if len(options_split) != 2:
+            raise ValueError("Corrupt message!")
+        options_str, msg = options_split
+
+        try:
+            options = Options.create_options_object(options_str)
+
+        except ValueError:
+            raise ValueError("Corrupt message!")
 
         if options.radix64 == "True":
             base64_data = msg.encode("utf8")
@@ -121,12 +131,26 @@ class Message:
             msg = byte_data.decode("utf8")
 
         if options.encryption == "True":
-            session_key_component_str, msg = msg.split("#####\n", 1)
-            session_key_component = SessionKeyComponent.create_session_key_component_object(session_key_component_str)
-            enc_session_key = session_key_component["enc_session_key"]
-            private_key = recepient_private_ring.get_private_key(password)
-            session_key = SessionKeyComponent.decrypt_session_key(enc_session_key, private_key)
-            msg = Message.decrypt_message(options.algorithm, session_key, msg)
+            session_split = msg.split("#####\n", 1)
+            if len(session_split) != 2:
+                raise ValueError("Corrupt message!")
+
+            try:
+                session_key_component_str, msg = session_split
+                session_key_component = SessionKeyComponent.create_session_key_component_object(session_key_component_str)
+                enc_key_id = int(session_key_component["key_id"])
+                recipient_private_ring_row = None
+                for row in recipient_private_ring.ring.values():
+                    if row.key_id == enc_key_id:
+                        recipient_private_ring_row = row
+                        break
+                enc_session_key = session_key_component["enc_session_key"]
+                private_key = recipient_private_ring_row.get_private_key(password)
+                session_key = SessionKeyComponent.decrypt_session_key(enc_session_key, private_key)
+                msg = Message.decrypt_message(options.algorithm, session_key, msg)
+
+            except:
+                raise ValueError("Unsuccessful decryption!")
 
         if options.compression == "True":
             msg = base64.b64decode(msg.encode("utf-8"))
@@ -136,15 +160,24 @@ class Message:
         message = Message.create_message_object(msg, options)
 
         if options.authentication == "True":
-            signature_component_str, msg = msg.split("#####\n", 1)
-            signature_component = SignatureComponent.create_signature_component_object(signature_component_str)
-            enc_digest = signature_component["enc_digest"]
-            public_key = sender_public_ring.public_key
-            if Message.verify_signature(enc_digest, public_key, message.data):
-                print("Successful verification!")
-                return message
-            else:
-                print("Unsuccessful verification!")
-                return None
+            authentication_split = msg.split("#####\n", 1)
+            if len(authentication_split) != 2:
+                raise ValueError("Corrupt message!")
+
+            try:
+                signature_component_str, msg = authentication_split
+                signature_component = SignatureComponent.create_signature_component_object(signature_component_str)
+                enc_digest = signature_component["enc_digest"]
+                auth_key_id = int(signature_component["key_id"])
+                sender_public_ring_row = None
+                for row in sender_public_ring.ring.values():
+                    if row.key_id == auth_key_id:
+                        sender_public_ring_row = row
+                        break
+                public_key = sender_public_ring_row.public_key
+                if Message.verify_signature(enc_digest, public_key, message.data) == False:
+                    raise ValueError("Unsuccessful verification!")
+            except:
+                raise ValueError("Unsuccessful verification!")
 
         return message

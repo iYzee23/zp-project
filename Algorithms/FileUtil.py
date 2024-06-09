@@ -24,15 +24,15 @@ class FileUtil:
         return None
 
     @staticmethod
-    def export_message(data):
-        root = tk.Tk()
-        root.withdraw()
-
-        file_path = filedialog.asksaveasfilename(
-            defaultextension=".txt",
-            filetypes=[("Text files", "*.txt")],
-            title="Save file as: "
-        )
+    def export_message(file_path, data):
+        # root = tk.Tk()
+        # root.withdraw()
+        #
+        # file_path = filedialog.asksaveasfilename(
+        #     defaultextension=".txt",
+        #     filetypes=[("Text files", "*.txt")],
+        #     title="Save file as: "
+        # )
 
         if file_path:
             with open(file_path, 'w') as file:

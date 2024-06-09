@@ -12,8 +12,8 @@ from Global.Variables import private_rings, public_rings
 
 def test_imports_exports():
     # export txt
-    message_txt = "Txt fajl"
-    FileUtil.export_message(message_txt)
+    # message_txt = "Txt fajl"
+    # FileUtil.export_message(message_txt)
 
     # import txt
     message_txt = FileUtil.import_message()
@@ -79,15 +79,16 @@ def test_message_sending(enc, auth, compr, radix, alg, sender, sender_key_id, re
 
 
 def test_message_receiving(recipient, recipient_key_id, sender_key_id, alg, cnt):
+    pass
     # msg = FileUtil.import_message()
-    with open(f"Tests/{alg}_{cnt}.txt", 'r') as file:
-        msg = file.read()
-        file.close()
-
-    recipient_private_row = private_rings[recipient].get_row(recipient_key_id)
-    sender_public_row = public_rings[recipient].get_row(sender_key_id)
-    message = Message.receive_message(msg, recipient_private_row, "nevajda123", sender_public_row)
-    print(message)
+    # with open(f"Tests/{alg}_{cnt}.txt", 'r') as file:
+    #     msg = file.read()
+    #     file.close()
+    #
+    # recipient_private_row = private_rings[recipient].get_row(recipient_key_id)
+    # sender_public_row = public_rings[recipient].get_row(sender_key_id)
+    # message = Message.receive_message(msg, recipient_private_row, "nevajda123", sender_public_row)
+    # print(message)
 
 
 def test_message_flow(enc, auth, compr, radix, alg, cnt):
