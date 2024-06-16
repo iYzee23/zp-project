@@ -2,7 +2,6 @@ import platform
 import datetime
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-from tkinter.scrolledtext import ScrolledText
 from Global.Variables import private_rings, public_rings, users
 from Algorithms.RSA import RSA
 from Algorithms.FileUtil import FileUtil
@@ -261,7 +260,11 @@ class GUI(tk.Tk):
         self.modal_password_entry = ttk.Entry(self.private_key_modal, show="*")
         self.modal_password_entry.grid(row=1, column=1, padx=10, pady=10)
 
-        self.modal_submit_button = ttk.Button(self.private_key_modal, text="See private key", command=self.show_private_key)
+        self.modal_submit_button = ttk.Button(
+            self.private_key_modal,
+            text="See private key",
+            command=self.show_private_key
+        )
         self.modal_submit_button.grid(row=2, column=0, columnspan=2, pady=20)
 
     def create_public_ring_page(self):
@@ -379,8 +382,10 @@ class GUI(tk.Tk):
 
     def toggle_authentication(self):
         if self.auth_var.get():
-
-            self.auth_keyid_combo.config(state="normal", values=[str(row.key_id) for row in self.private_ring.ring.values()])
+            self.auth_keyid_combo.config(
+                state="normal",
+                values=[str(row.key_id) for row in self.private_ring.ring.values()]
+            )
         else:
             self.auth_keyid_combo.config(state="disabled")
 
@@ -482,8 +487,6 @@ class GUI(tk.Tk):
         self.result_label = ttk.Label(labels_frame, text="", font=("Helvetica", 10))
         self.result_label.grid(row=7, column=0, sticky="w", pady=5)
 
-
-
         ttk.Label(receive_message_frame, text="Message:").grid(row=1, column=0, columnspan=2, sticky="w", padx=10)
         self.received_message_text = tk.Text(receive_message_frame, width=80, height=15)
         self.received_message_text.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
@@ -527,7 +530,6 @@ class GUI(tk.Tk):
                     self.enc_label.configure(foreground="green")
                     self.enc_algo_label.configure(text=options.algorithm)
                     self.enc_algo_label.configure(foreground="green")
-
                 elif options.encryption == "False":
                     self.enc_label.configure(text="Encryption not present")
                     self.enc_label.configure(foreground="red")
@@ -536,7 +538,6 @@ class GUI(tk.Tk):
                 if options.compression == "True":
                     self.comp_label.configure(text="Compression present")
                     self.comp_label.configure(foreground="green")
-
                 elif options.compression == "False":
                     self.comp_label.configure(text="Compression not present")
                     self.comp_label.configure(foreground="red")
@@ -544,7 +545,6 @@ class GUI(tk.Tk):
                 if options.radix64 == "True":
                     self.radix_label.configure(text="Radix present")
                     self.radix_label.configure(foreground="green")
-
                 elif options.radix64 == "False":
                     self.radix_label.configure(text="Radix not present")
                     self.radix_label.configure(foreground="red")
@@ -552,10 +552,13 @@ class GUI(tk.Tk):
                 self.result_label.configure(text="Message successfully received!", foreground="green")
 
         except ValueError as e:
+            self.received_message_text.configure(state="normal")
+            self.received_message_text.delete("1.0", tk.END)
+            self.received_message_text.insert(tk.END, "")
+            self.received_message_text.configure(state="disabled")
             self.result_label.configure(text=f"{e}", foreground="red")
 
     def save_message(self):
-
         filename = filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
@@ -581,7 +584,6 @@ class GUI(tk.Tk):
 
                     self.status_label.config(text="Public key deleted successfully!", foreground="green")
                     return
-
         self.status_label.config(text="You must choose key id!", foreground="red")
 
     def delete_both_keys(self):

@@ -122,7 +122,6 @@ class Message:
 
         try:
             options = Options.create_options_object(options_str)
-
         except ValueError:
             raise ValueError("Corrupt message!")
 
@@ -135,7 +134,6 @@ class Message:
             session_split = msg.split("#####\n", 1)
             if len(session_split) != 2:
                 raise ValueError("Corrupt message!")
-
             try:
                 session_key_component_str, msg = session_split
                 session_key_component = SessionKeyComponent.create_session_key_component_object(session_key_component_str)
@@ -149,7 +147,6 @@ class Message:
                 private_key = recipient_private_ring_row.get_private_key(password)
                 session_key = SessionKeyComponent.decrypt_session_key(enc_session_key, private_key)
                 msg = Message.decrypt_message(options.algorithm, session_key, msg)
-
             except:
                 raise ValueError("Unsuccessful decryption!")
 
