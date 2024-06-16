@@ -557,6 +557,8 @@ class GUI(tk.Tk):
             self.received_message_text.delete("1.0", tk.END)
             self.received_message_text.insert(tk.END, "")
             self.received_message_text.configure(state="disabled")
+            self.sender_name_label.configure(text="")
+            self.sender_mail_label.configure(text="")
             self.result_label.configure(text=f"{e}", foreground="red")
 
     def save_message(self):
