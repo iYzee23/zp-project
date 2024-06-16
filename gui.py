@@ -523,6 +523,8 @@ class GUI(tk.Tk):
                 elif options.authentication == "False":
                     self.auth_label.configure(text="Authentication/Signature not present")
                     self.auth_label.configure(foreground="red")
+                    self.sender_name_label.configure(text="")
+                    self.sender_mail_label.configure(text="")
 
                 if options.encryption == "True":
                     self.enc_label.configure(text="Encryption present")
