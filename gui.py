@@ -461,20 +461,26 @@ class GUI(tk.Tk):
         self.auth_label = ttk.Label(labels_frame, text="Authentication/signature [option]", font=("Helvetica", 10), foreground="black")
         self.auth_label.grid(row=0, column=0, sticky="w", pady=5)
 
+        self.sender_name_label = ttk.Label(labels_frame, text="", font=("Helvetica", 10),foreground="black")
+        self.sender_name_label.grid(row=1, column=0, sticky="w", pady=5)
+
+        self.sender_mail_label = ttk.Label(labels_frame, text="", font=("Helvetica", 10),foreground="black")
+        self.sender_mail_label.grid(row=2, column=0, sticky="w", pady=5)
+
         self.enc_label = ttk.Label(labels_frame, text="Encryption AES128/DES3 [option]", font=("Helvetica", 10), foreground="black")
-        self.enc_label.grid(row=1, column=0, sticky="w", pady=5)
+        self.enc_label.grid(row=3, column=0, sticky="w", pady=5)
 
         self.comp_label = ttk.Label(labels_frame, text="Compression [option]", font=("Helvetica", 10), foreground="black")
-        self.comp_label.grid(row=2, column=0, sticky="w", pady=5)
+        self.comp_label.grid(row=4, column=0, sticky="w", pady=5)
 
         self.radix_label = ttk.Label(labels_frame, text="Radix64 [option]", font=("Helvetica", 10), foreground="black")
-        self.radix_label.grid(row=3, column=0, sticky="w", pady=5)
+        self.radix_label.grid(row=5, column=0, sticky="w", pady=5)
 
         self.enc_algo_label = ttk.Label(labels_frame, text="", font=("Helvetica", 10))
-        self.enc_algo_label.grid(row=4, column=0, sticky="w", pady=5)
+        self.enc_algo_label.grid(row=6, column=0, sticky="w", pady=5)
 
         self.result_label = ttk.Label(labels_frame, text="", font=("Helvetica", 10))
-        self.result_label.grid(row=5, column=0, sticky="w", pady=5)
+        self.result_label.grid(row=7, column=0, sticky="w", pady=5)
 
 
 
@@ -496,7 +502,7 @@ class GUI(tk.Tk):
             message_string = FileUtil.import_message()
 
             if message_string is not None:
-                message = Message.receive_message(message_string, self.private_ring, self.user[0], self.public_ring)
+                message, sender = Message.receive_message(message_string, self.private_ring, self.user[0], self.public_ring)
                 self.received_message_text.configure(state="normal")
                 self.received_message_text.delete("1.0", tk.END)
                 self.received_message_text.insert(tk.END, message)
@@ -507,7 +513,11 @@ class GUI(tk.Tk):
                 if options.authentication == "True":
                     self.auth_label.configure(text="Authentication/Signature present")
                     self.auth_label.configure(foreground="green")
-
+                    sender_data = sender.split("###")
+                    self.sender_name_label.configure(text=sender_data[0].strip())
+                    self.sender_name_label.configure(foreground="green")
+                    self.sender_mail_label.configure(text=sender_data[1].strip())
+                    self.sender_mail_label.configure(foreground="green")
                 elif options.authentication == "False":
                     self.auth_label.configure(text="Authentication/Signature not present")
                     self.auth_label.configure(foreground="red")
@@ -518,7 +528,7 @@ class GUI(tk.Tk):
                     self.enc_algo_label.configure(text=options.algorithm)
                     self.enc_algo_label.configure(foreground="green")
 
-                elif options.encryption == "True":
+                elif options.encryption == "False":
                     self.enc_label.configure(text="Encryption not present")
                     self.enc_label.configure(foreground="red")
                     self.enc_algo_label.configure(text="")

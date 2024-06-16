@@ -114,6 +114,7 @@ class Message:
 
     @staticmethod
     def receive_message(msg: str, recipient_private_ring: PrivateRing, password, sender_public_ring: PublicRing):
+        sender = None
         options_split = msg.split("#####\n", 1)
         if len(options_split) != 2:
             raise ValueError("Corrupt message!")
@@ -175,9 +176,10 @@ class Message:
                         sender_public_ring_row = row
                         break
                 public_key = sender_public_ring_row.public_key
+                sender = sender_public_ring_row.user_id
                 if Message.verify_signature(enc_digest, public_key, message.data) == False:
                     raise ValueError("Unsuccessful verification!")
             except:
                 raise ValueError("Unsuccessful verification!")
 
-        return message
+        return message, sender
