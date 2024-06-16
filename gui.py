@@ -181,10 +181,9 @@ class GUI(tk.Tk):
         import_both_button.grid(row=5, column=2, columnspan=2, pady=10)
 
     def create_export_keys_section(self, parent):
-        public_values = [str(row.key_id) for row in self.public_ring.ring.values()]
         private_values = [str(row.key_id) for row in self.private_ring.ring.values()]
 
-        self.export_public_selection = ttk.Combobox(parent, values=public_values)
+        self.export_public_selection = ttk.Combobox(parent, values=private_values)
         self.export_public_selection.grid(row=9, column=0, columnspan=2, padx=10, pady=5)
 
         self.export_both_selection = ttk.Combobox(parent, values=private_values)
@@ -528,7 +527,7 @@ class GUI(tk.Tk):
                     self.enc_algo_label.configure(text=options.algorithm)
                     self.enc_algo_label.configure(foreground="green")
 
-                elif options.encryption == "False":
+                elif options.encryption == "False ":
                     self.enc_label.configure(text="Encryption not present")
                     self.enc_label.configure(foreground="red")
                     self.enc_algo_label.configure(text="")
@@ -603,12 +602,15 @@ class GUI(tk.Tk):
             row = RSA.import_public_ring_row_tk()
 
             if row is not None:
-                self.public_ring.ring[row.key_id] = row
+                if row.user_id == (self.user[1] + "###" + self.user[2]):
+                    self.status_label.config(text="Public key belongs to this user and cant be added to public key ring!", foreground="red")
+                else:
+                    self.public_ring.ring[row.key_id] = row
 
-                self.create_main_application()
-                self.show_page("Keys")
+                    self.create_main_application()
+                    self.show_page("Keys")
 
-                self.status_label.config(text="Public key imported successfully!", foreground="green")
+                    self.status_label.config(text="Public key imported successfully!", foreground="green")
 
         except ValueError as e:
             print(f"Caught exception: {e}")
@@ -634,7 +636,7 @@ class GUI(tk.Tk):
     def export_public_key(self):
         value = self.export_public_selection.get()
         if value != "":
-            for row in self.public_ring.ring.values():
+            for row in self.private_ring.ring.values():
                 if row.key_id == int(value):
                     RSA.export_public_ring_row_tk(row)
                     self.create_main_application()
@@ -668,8 +670,7 @@ class GUI(tk.Tk):
             self.password_entry.delete(0, tk.END)
             self.status_label.config(text="Key size not chosen!", foreground="red")
         else:
-            (public_key, private_key) =RSA.generate_keys(int(self.key_size.get()))
-            self.public_ring.add_row(public_key, self.user[1], self.user[2])
+            (public_key, private_key) = RSA.generate_keys(int(self.key_size.get()))
             self.private_ring.add_row(public_key, private_key, self.user[0], self.user[1], self.user[2], self.user[3])
             self.create_main_application()
             self.show_page("Keys")
