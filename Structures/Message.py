@@ -31,7 +31,7 @@ class Message:
         lines = message_string.split('\n')
         filename = None
         timestamp = None
-        data = None
+        data: str = ""
 
         for line in lines:
             if line.startswith('Filename: '):
@@ -40,7 +40,10 @@ class Message:
                 timestamp = line.split('Timestamp: ')[1]
             elif line.startswith('Data: '):
                 data = line.split('Data: ')[1]
+            else:
+                data += str("\n" + line)
 
+        data = data.rstrip("\n")
         return Message(data, filename, timestamp, options)
 
     @staticmethod
@@ -167,14 +170,13 @@ class Message:
                 signature_component = SignatureComponent.create_signature_component_object(signature_component_str)
                 enc_digest = signature_component["enc_digest"]
                 auth_key_id = int(signature_component["key_id"])
-                sender_public_ring_row = None
                 for row in sender_public_ring.ring.values():
                     if row.key_id == auth_key_id:
                         sender_public_ring_row = row
                         break
                 public_key = sender_public_ring_row.public_key
                 sender = sender_public_ring_row.user_id
-                if Message.verify_signature(enc_digest, public_key, message.data) == False:
+                if not Message.verify_signature(enc_digest, public_key, message.data):
                     raise ValueError("Unsuccessful verification!")
             except:
                 raise ValueError("Unsuccessful verification!")

@@ -390,7 +390,7 @@ class GUI(tk.Tk):
 
     def toggle_encryption(self):
         if self.enc_var.get():
-            self.enc_user_combo.config(state="normal", values=[row.user_id for row in self.public_ring.ring.values()])
+            self.enc_user_combo.config(state="normal", values=list(set(row.user_id for row in self.public_ring.ring.values())))
             self.enc_keyid_combo.config(state="normal")
             self.algorithm_combo.config(state="normal", values=["AES128", "DES3"])
         else:
@@ -420,14 +420,18 @@ class GUI(tk.Tk):
             if self.algorithm_combo.get() == '':
                 error_string += "No algorithm selected!\n"
 
+            ind = False
             for row in self.public_ring.ring.values():
-                if row.user_id == self.enc_user_combo.get() and row.key_id != int(self.enc_keyid_combo.get()):
-                    error_string += "The selected public key does not belong to the selected user!\n"
+                if row.user_id == self.enc_user_combo.get() and row.key_id == int(self.enc_keyid_combo.get()):
+                    ind = True
+                    break
+            if not ind:
+                error_string += "The selected public key does not belong to the selected user!\n"
         if error_string != "":
             messagebox.showerror("Error", error_string)
             return
         options = Options(self.enc_var.get(), self.auth_var.get(), self.comp_var.get(), self.radix_var.get(), self.algorithm_combo.get())
-        message = Message(self.send_message_text.get("1.0", 'end-1c'), None, datetime.datetime.now(), options)
+        message = Message(self.send_message_text.get("1.0", 'end-1c').rstrip('\n'), None, datetime.datetime.now(), options)
 
         sender_ring_row = None
         recipient_ring_row = None
